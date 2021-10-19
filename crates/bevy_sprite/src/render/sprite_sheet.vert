@@ -39,7 +39,7 @@ layout(set = 2, binding = 1) uniform TextureAtlasSprite {
 void main() {
     Rect sprite_rect = Textures[index];
     vec2 sprite_dimensions = sprite_rect.end - sprite_rect.begin;
-    vec3 vertex_position = vec3(Vertex_Position.xy * sprite_dimensions, 0.0);
+    vec3 vertex_position = vec3(Vertex_Position.xy * sprite_dimensions, 1.0);
 
     // Specify the corners of the sprite
     vec2 bottom_left = vec2(sprite_rect.begin.x, sprite_rect.end.y);
