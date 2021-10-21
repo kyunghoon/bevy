@@ -11,8 +11,8 @@ layout(set = 1, binding = 3) uniform sampler TextureAtlas_texture_sampler;
 void main() {
     vec4 color = texture(sampler2D(TextureAtlas_texture, TextureAtlas_texture_sampler), v_Uv);
     if (color.a == 0.0) {
-      discard;
+        discard;
     } else {
-      o_Target = v_Color * color;
+        o_Target = v_Color * color;
     }
 }

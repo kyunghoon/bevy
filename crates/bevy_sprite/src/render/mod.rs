@@ -12,6 +12,17 @@ use bevy_render::{
     texture::TextureFormat,
 };
 
+/*
+fn read_str(file: &str) -> String {
+    let curdir = std::env::current_dir();
+    let bytes = curdir.as_ref().ok()
+    .and_then(|p| p.parent())
+    .and_then(|p| std::path::Path::new(file!()).parent().map(|dir| p.join(dir)))
+    .and_then(|dir| std::fs::read_to_string((String::new() + dir.to_str()? + "/" + file).as_str()).ok()).unwrap_or_default();
+    bytes
+}
+*/
+
 pub const SPRITE_PIPELINE_HANDLE: HandleUntyped =
     HandleUntyped::weak_from_u64(PipelineDescriptor::TYPE_UUID, 2785347840338765446);
 
@@ -59,14 +70,14 @@ pub fn build_sprite_sheet_pipeline(shaders: &mut Assets<Shader>) -> PipelineDesc
             polygon_mode: PolygonMode::Fill,
         },
         ..PipelineDescriptor::new(ShaderStages {
-            vertex: shaders.add(Shader::from_glsl(
-                ShaderStage::Vertex,
-                include_str!("sprite_sheet.vert"),
-            )),
-            fragment: Some(shaders.add(Shader::from_glsl(
-                ShaderStage::Fragment,
-                include_str!("sprite_sheet.frag"),
-            ))),
+            vertex: shaders.add(Shader::from_glsl(ShaderStage::Vertex, {
+                include_str!("sprite_sheet.vert")
+                //read_str("sprite_sheet.vert").as_str()
+            })),
+            fragment: Some(shaders.add(Shader::from_glsl(ShaderStage::Fragment, {
+                include_str!("sprite_sheet.frag")
+                //read_str("sprite_sheet.frag").as_str()
+            }))),
         })
     }
 }
