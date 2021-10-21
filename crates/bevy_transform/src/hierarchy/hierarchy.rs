@@ -11,6 +11,21 @@ pub struct DespawnRecursive {
     entity: Entity,
 }
 
+#[derive(Debug)]
+pub struct DespawnChildrenRecursive {
+    entity: Entity,
+}
+
+impl Command for DespawnChildrenRecursive {
+    fn write(self: Box<Self>, world: &mut World) {
+        if let Some(mut children) = world.get_mut::<Children>(self.entity) {
+            for e in std::mem::take(&mut children.0) {
+                despawn_with_children_recursive(world, e);
+            }
+        }
+    }
+}
+
 pub fn despawn_with_children_recursive(world: &mut World, entity: Entity) {
     // first, make the entity's own parent forget about it
     if let Some(parent) = world.get::<Parent>(entity).map(|parent| parent.0) {
@@ -52,6 +67,19 @@ impl<'a, 'b> DespawnRecursiveExt for EntityCommands<'a, 'b> {
     fn despawn_recursive(&mut self) {
         let entity = self.id();
         self.commands().add(DespawnRecursive { entity });
+    }
+}
+
+pub trait DespawnChildrenRecursiveExt {
+    fn despawn_children_recursive(&mut self) -> &mut Self;
+}
+
+impl<'a, 'b> DespawnChildrenRecursiveExt for EntityCommands<'a, 'b> {
+    /// Despawns the provided entity and its children.
+    fn despawn_children_recursive(&mut self) -> &mut Self {
+        let entity = self.id();
+        self.commands().add(DespawnChildrenRecursive { entity });
+        self
     }
 }
 
