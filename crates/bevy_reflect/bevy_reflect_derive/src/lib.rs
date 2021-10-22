@@ -282,7 +282,7 @@ fn impl_struct(
                 Box::new(self.clone_dynamic())
             }
             #[inline]
-            fn set(&mut self, value: Box<dyn #bevy_reflect_path::Reflect>) -> Result<(), Box<dyn #bevy_reflect_path::Reflect>> {
+            fn set(&mut self, value: Box<dyn #bevy_reflect_path::Reflect>) -> std::result::Result<(), Box<dyn #bevy_reflect_path::Reflect>> {
                 *self = value.take()?;
                 Ok(())
             }
@@ -404,7 +404,7 @@ fn impl_tuple_struct(
                 Box::new(self.clone_dynamic())
             }
             #[inline]
-            fn set(&mut self, value: Box<dyn #bevy_reflect_path::Reflect>) -> Result<(), Box<dyn #bevy_reflect_path::Reflect>> {
+            fn set(&mut self, value: Box<dyn #bevy_reflect_path::Reflect>) -> std::result::Result<(), Box<dyn #bevy_reflect_path::Reflect>> {
                 *self = value.take()?;
                 Ok(())
             }
@@ -492,7 +492,7 @@ fn impl_value(
             }
 
             #[inline]
-            fn set(&mut self, value: Box<dyn #bevy_reflect_path::Reflect>) -> Result<(), Box<dyn #bevy_reflect_path::Reflect>> {
+            fn set(&mut self, value: Box<dyn #bevy_reflect_path::Reflect>) -> std::result::Result<(), Box<dyn #bevy_reflect_path::Reflect>> {
                 *self = value.take()?;
                 Ok(())
             }
