@@ -103,18 +103,25 @@ pub fn get_wgpu_render_system(world: &mut World) -> impl FnMut(&mut World) {
         .get_resource::<WgpuOptions>()
         .cloned()
         .unwrap_or_else(WgpuOptions::default);
+    let noop_render = options.noop_render;
     let mut wgpu_renderer = future::block_on(WgpuRenderer::new(options));
 
     let resource_context = WgpuRenderResourceContext::new(wgpu_renderer.device.clone());
     world.insert_resource::<Box<dyn RenderResourceContext>>(Box::new(resource_context));
     world.insert_resource(SharedBuffers::new(4096));
+
     move |world| {
-        wgpu_renderer.update(world);
+        if let Some(duration) = noop_render {
+            std::thread::sleep(duration);
+        } else {
+            wgpu_renderer.update(world);
+        }
     }
 }
 
 #[derive(Default, Clone)]
 pub struct WgpuOptions {
+    pub noop_render: Option<std::time::Duration>,
     pub device_label: Option<Cow<'static, str>>,
     pub backend: WgpuBackend,
     pub power_pref: WgpuPowerOptions,

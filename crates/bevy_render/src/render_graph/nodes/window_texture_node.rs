@@ -49,28 +49,26 @@ impl Node for WindowTextureNode {
         let window_resized_events = world.get_resource::<Events<WindowResized>>().unwrap();
         let windows = world.get_resource::<Windows>().unwrap();
 
-        let window = windows
-            .get(self.window_id)
-            .expect("Window texture node refers to a non-existent window.");
-
-        if self
-            .window_created_event_reader
-            .iter(&window_created_events)
-            .any(|e| e.id == window.id())
-            || self
-                .window_resized_event_reader
-                .iter(&window_resized_events)
+        windows.get(self.window_id).map(|window| {
+            if self
+                .window_created_event_reader
+                .iter(&window_created_events)
                 .any(|e| e.id == window.id())
-        {
-            let render_resource_context = render_context.resources_mut();
-            if let Some(RenderResourceId::Texture(old_texture)) = output.get(WINDOW_TEXTURE) {
-                render_resource_context.remove_texture(old_texture);
-            }
+                || self
+                    .window_resized_event_reader
+                    .iter(&window_resized_events)
+                    .any(|e| e.id == window.id())
+            {
+                let render_resource_context = render_context.resources_mut();
+                if let Some(RenderResourceId::Texture(old_texture)) = output.get(WINDOW_TEXTURE) {
+                    render_resource_context.remove_texture(old_texture);
+                }
 
-            self.descriptor.size.width = window.physical_width();
-            self.descriptor.size.height = window.physical_height();
-            let texture_resource = render_resource_context.create_texture(self.descriptor);
-            output.set(WINDOW_TEXTURE, RenderResourceId::Texture(texture_resource));
-        }
+                self.descriptor.size.width = window.physical_width();
+                self.descriptor.size.height = window.physical_height();
+                let texture_resource = render_resource_context.create_texture(self.descriptor);
+                output.set(WINDOW_TEXTURE, RenderResourceId::Texture(texture_resource));
+            }
+        });
     }
 }
