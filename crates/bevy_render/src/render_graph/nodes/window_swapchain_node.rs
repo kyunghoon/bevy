@@ -42,31 +42,33 @@ impl Node for WindowSwapChainNode {
         output: &mut ResourceSlots,
     ) {
         const WINDOW_TEXTURE: usize = 0;
-        let window_created_events = world.get_resource::<Events<WindowCreated>>().unwrap();
-        let window_resized_events = world.get_resource::<Events<WindowResized>>().unwrap();
-        let windows = world.get_resource::<Windows>().unwrap();
+        let window_created_events = world.get_resource::<Events<WindowCreated>>();
+        let window_resized_events = world.get_resource::<Events<WindowResized>>();
+        if let (Some(window_created_events), Some(window_resized_events)) = (window_created_events, window_resized_events) {
+            if let Some(windows) = world.get_resource::<Windows>() {
+                windows.get(self.window_id).map(|window| {
+                    let render_resource_context = render_context.resources_mut();
 
-        windows.get(self.window_id).map(|window| {
-            let render_resource_context = render_context.resources_mut();
+                    // create window swapchain when window is resized or created
+                    if self
+                        .window_created_event_reader
+                        .iter(&window_created_events)
+                        .any(|e| e.id == window.id())
+                        || self
+                            .window_resized_event_reader
+                            .iter(&window_resized_events)
+                            .any(|e| e.id == window.id())
+                    {
+                        render_resource_context.create_swap_chain(window);
+                    }
 
-            // create window swapchain when window is resized or created
-            if self
-                .window_created_event_reader
-                .iter(&window_created_events)
-                .any(|e| e.id == window.id())
-                || self
-                    .window_resized_event_reader
-                    .iter(&window_resized_events)
-                    .any(|e| e.id == window.id())
-            {
-                render_resource_context.create_swap_chain(window);
+                    let swap_chain_texture = render_resource_context.next_swap_chain_texture(&window);
+                    output.set(
+                        WINDOW_TEXTURE,
+                        RenderResourceId::Texture(swap_chain_texture),
+                    );
+                });
             }
-
-            let swap_chain_texture = render_resource_context.next_swap_chain_texture(&window);
-            output.set(
-                WINDOW_TEXTURE,
-                RenderResourceId::Texture(swap_chain_texture),
-            );
-        });
+        }
     }
 }
