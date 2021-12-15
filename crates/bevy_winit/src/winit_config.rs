@@ -12,4 +12,7 @@ pub struct WinitConfig {
     /// `openbsd`. If set to true on an unsupported platform
     /// [run](bevy_app::App::run) will panic.
     pub return_from_run: bool,
+
+    pub control_flow_should_wait: bool,
+    pub noop_render: Option<std::time::Duration>,
 }

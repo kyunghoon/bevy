@@ -15,7 +15,7 @@ use bevy_ecs::{
     world::World,
 };
 use bevy_render::{
-    renderer::{shared_buffers_update_system, RenderResourceContext, SharedBuffers},
+    renderer::{shared_buffers_update_system, RenderResourceContext, SharedBuffers, HeadlessRenderResourceContext},
     RenderStage,
 };
 use futures_lite::future;
@@ -104,17 +104,24 @@ pub fn get_wgpu_render_system(world: &mut World) -> impl FnMut(&mut World) {
         .cloned()
         .unwrap_or_else(WgpuOptions::default);
     let noop_render = options.noop_render;
-    let mut wgpu_renderer = future::block_on(WgpuRenderer::new(options));
+    let mut renderer = if noop_render.is_some() {
+        let resource_context = HeadlessRenderResourceContext::default();
+        world.insert_resource::<Box<dyn RenderResourceContext>>(Box::new(resource_context));
+        world.insert_resource(SharedBuffers::new(4096));
+        None
+    } else {
+        let wgpu_renderer = future::block_on(WgpuRenderer::new(options));
 
-    let resource_context = WgpuRenderResourceContext::new(wgpu_renderer.device.clone());
-    world.insert_resource::<Box<dyn RenderResourceContext>>(Box::new(resource_context));
-    world.insert_resource(SharedBuffers::new(4096));
-
+        let resource_context = WgpuRenderResourceContext::new(wgpu_renderer.device.clone());
+        world.insert_resource::<Box<dyn RenderResourceContext>>(Box::new(resource_context));
+        world.insert_resource(SharedBuffers::new(4096));
+        Some(wgpu_renderer)
+    };
     move |world| {
         if let Some(duration) = noop_render {
             std::thread::sleep(duration);
-        } else {
-            wgpu_renderer.update(world);
+        } else if let Some(renderer) = renderer.as_mut() {
+            renderer.update(world);
         }
     }
 }

@@ -49,8 +49,10 @@ impl PipelineLayout {
             }
         }
 
-        for vertex_buffer_descriptor in shader_layouts[0].vertex_buffer_layout.iter() {
-            vertex_buffer_descriptors.push(vertex_buffer_descriptor.clone());
+        if let Some(shader_layout) = shader_layouts.get(0) {
+            for vertex_buffer_descriptor in shader_layout.vertex_buffer_layout.iter() {
+                vertex_buffer_descriptors.push(vertex_buffer_descriptor.clone());
+            }
         }
 
         let mut bind_groups_result = bind_groups

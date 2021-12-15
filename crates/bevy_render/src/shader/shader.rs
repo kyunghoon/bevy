@@ -194,7 +194,8 @@ impl Shader {
                 enforce_bevy_conventions,
             ))
         } else {
-            panic!("Cannot reflect layout of non-SpirV shader. Try compiling this shader to SpirV first using self.get_spirv_shader().");
+            //panic!("Cannot reflect layout of non-SpirV shader. Try compiling this shader to SpirV first using self.get_spirv_shader().");
+            None
         }
     }
 

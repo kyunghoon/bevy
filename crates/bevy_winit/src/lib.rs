@@ -13,7 +13,7 @@ pub use winit_windows::*;
 use bevy_app::{App, AppBuilder, AppExit, CoreStage, Events, ManualEventReader, Plugin};
 use bevy_ecs::{system::IntoExclusiveSystem, world::World};
 use bevy_math::{ivec2, Vec2};
-use bevy_utils::tracing::{error, trace, warn};
+use bevy_utils::{tracing::{error, trace, warn}, Instant};
 use bevy_window::{
     CreateWindow, CursorEntered, CursorLeft, CursorMoved, FileDragAndDrop, ReceivedCharacter,
     WindowBackendScaleFactorChanged, WindowCloseRequested, WindowCreated, WindowFocused,
@@ -234,10 +234,17 @@ pub fn winit_runner_with(mut app: App, mut event_loop: EventLoop<()>) {
         .get_resource::<WinitConfig>()
         .map_or(false, |config| config.return_from_run);
 
+    let noop_render = app
+        .world
+        .get_resource::<WinitConfig>()
+        .map_or(None, |config| config.noop_render);
+
     let event_handler = move |event: Event<()>,
                               event_loop: &EventLoopWindowTarget<()>,
                               control_flow: &mut ControlFlow| {
-        *control_flow = ControlFlow::Poll;
+        *control_flow = if let Some(duration) = noop_render {
+            ControlFlow::WaitUntil(Instant::now() + duration)
+        } else { ControlFlow::Poll };
 
         if let Some(app_exit_events) = app.world.get_resource_mut::<Events<AppExit>>() {
             if app_exit_event_reader

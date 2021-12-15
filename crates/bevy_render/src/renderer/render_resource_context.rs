@@ -3,7 +3,7 @@ use crate::{
     renderer::{
         BindGroup, BufferId, BufferInfo, BufferMapMode, RenderResourceId, SamplerId, TextureId,
     },
-    shader::{Shader, ShaderError, ShaderLayout, ShaderStages},
+    shader::{Shader, ShaderError, ShaderStages},
     texture::{SamplerDescriptor, TextureDescriptor},
 };
 use bevy_asset::{Asset, Assets, Handle, HandleUntyped};
@@ -94,16 +94,13 @@ pub trait RenderResourceContext: Downcast + Send + Sync + 'static {
         enforce_bevy_conventions: bool,
     ) -> PipelineLayout {
         // TODO: maybe move this default implementation to PipelineLayout?
-        let mut shader_layouts: Vec<ShaderLayout> = shader_stages
+        let mut shader_layouts = shader_stages
             .iter()
-            .map(|handle| {
-                shaders
-                    .get(&handle)
-                    .unwrap()
-                    .reflect_layout(enforce_bevy_conventions)
-                    .unwrap()
+            .filter_map(|handle| {
+                shaders.get(&handle).and_then(|shader|
+                    shader.reflect_layout(enforce_bevy_conventions))
             })
-            .collect();
+            .collect::<Vec<_>>();
         PipelineLayout::from_shader_layouts(&mut shader_layouts)
     }
 }
