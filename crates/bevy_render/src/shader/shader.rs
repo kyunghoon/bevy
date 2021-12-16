@@ -42,6 +42,7 @@ pub enum ShaderError {
 }
 
 #[cfg(all(
+    feature = "spirv",
     not(target_os = "ios"),
     not(target_arch = "wasm32"),
     not(all(target_arch = "aarch64", target_os = "macos"))
@@ -57,6 +58,7 @@ impl From<ShaderStage> for bevy_glsl_to_spirv::ShaderType {
 }
 
 #[cfg(all(
+    feature = "spirv",
     not(target_os = "ios"),
     not(target_arch = "wasm32"),
     not(all(target_arch = "aarch64", target_os = "macos"))
@@ -170,7 +172,7 @@ impl Shader {
         }
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(all(feature = "spirv", not(target_arch = "wasm32")))]
     pub fn get_spirv(&self, macros: Option<&[String]>) -> Result<Vec<u32>, ShaderError> {
         match self.source {
             ShaderSource::Spirv(ref bytes) => Ok(bytes.clone()),
@@ -178,7 +180,7 @@ impl Shader {
         }
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(all(feature = "spirv", not(target_arch = "wasm32")))]
     pub fn get_spirv_shader(&self, macros: Option<&[String]>) -> Result<Shader, ShaderError> {
         Ok(Shader {
             source: ShaderSource::Spirv(self.get_spirv(macros)?),

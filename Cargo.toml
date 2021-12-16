@@ -21,18 +21,20 @@ members = ["crates/*", "examples/ios", "tools/ci"]
 
 [features]
 default = [
-  "bevy_audio",
+  #"bevy_audio",
   "bevy_dynamic_plugin",
   "bevy_gilrs",
   "bevy_gltf",
-  "bevy_wgpu",
+  #"bevy_wgpu",
   "bevy_winit",
   "render",
   "png",
-  "hdr",
-  "mp3",
+  #"mp3",
   "x11",
+  "hdr"
 ]
+
+spirv = ["bevy_internal/spirv"]
 
 # Force dynamic linking, which improves iterative compile times
 dynamic = ["bevy_dylib"]
